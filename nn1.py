@@ -13,8 +13,11 @@ tokenized_corpus = encoder.encode(corpus)
 vocabulary = list(set(tokenized_corpus))
 ngrams = []
 
-for i in range(len(tokenized_corpus) - 2):
-    ngrams.append((tokenized_corpus[i], tokenized_corpus[i+1], tokenized_corpus[i + 2]))
+for i in range(len(tokenized_corpus) -  ngram_length):
+    ngram = []
+    for j in range(ngram_length):
+        ngram.append(tokenized_corpus[i + j])
+    ngrams.append(ngram)
 
 def generate(sequence, max_tokens):
     while (len(sequence) < max_tokens):
