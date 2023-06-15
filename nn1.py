@@ -21,20 +21,25 @@ for i in range(len(tokenized_corpus) -  ngram_length):
 
 def generate(sequence, max_tokens):
     while (len(sequence) < max_tokens):
-        token = generate_token(sequence[len(sequence) - 2], sequence[len(sequence) - 1])
-        #print(encoder.decode([token]), end='')
+        token = generate_token(sequence[len(sequence) - (ngram_length - 1):])
         sequence.append(token)
     print(encoder.decode(sequence))
 
-def generate_token(token1, token2):
+def matches_ngram(ngram, tokens):
+    for i in range(ngram_length - 1):
+        if ngram[i] != tokens[i]:
+            return False
+    return True
+
+def generate_token(tokens):
     candidates = {}
-    for trigram in ngrams:
-        if trigram[0] == token1:
-            if trigram[1] == token2:
-                if not trigram[2] in candidates:
-                    candidates[trigram[2]] = 1
-                else:
-                    candidates[trigram[2]] = candidates[trigram[2]] + 1
+    for ngram in ngrams:
+        if matches_ngram(ngram, tokens):
+            ngram_tail = ngram[ngram_length - 1]
+            if not ngram_tail in candidates:
+                candidates[ngram_tail] = 1
+            else:
+                candidates[ngram_tail] = candidates[ngram_tail] + 1
     if len(candidates) == 0:
         return random.choice(vocabulary)
     else:
