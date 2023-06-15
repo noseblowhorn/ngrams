@@ -1,12 +1,13 @@
 import tiktoken
 import random
 import functools
+import sys
 
 random.seed()
-with open("corpus/king-james-bible.txt", "r") as f:
+with open("corpus/krzyzacy-tom-pierwszy.txt", "r") as f:
     corpus = f.read()
 
-ngram_length = 3
+ngram_length = 4
 
 encoder = tiktoken.encoding_for_model('gpt-4')
 tokenized_corpus = encoder.encode(corpus)
@@ -20,10 +21,13 @@ for i in range(len(tokenized_corpus) -  ngram_length):
     ngrams.append(ngram)
 
 def generate(sequence, max_tokens):
+    for token in sequence:
+        print(encoder.decode([token]), end='')
     while (len(sequence) < max_tokens):
         token = generate_token(sequence[len(sequence) - (ngram_length - 1):])
+        print(encoder.decode([token]), end='')
+        sys.stdout.flush()
         sequence.append(token)
-    print(encoder.decode(sequence))
 
 def matches_ngram(ngram, tokens):
     for i in range(ngram_length - 1):
@@ -43,9 +47,10 @@ def generate_token(tokens):
     if len(candidates) == 0:
         return random.choice(vocabulary)
     else:
-        list = [(k,v) for k,v in candidates.items()]
-        sum = functools.reduce(lambda x,y: x + y, [x[1] for x in list])
-        probs = [(k, v / sum) for k,v in candidates.items()]
+        # normalize occurence counts to get probabilities
+        total_occurences = functools.reduce(lambda x,y: x + y, [x[1] for x in candidates.items()])
+        probs = [(k, v / total_occurences) for k,v in candidates.items()]
+
         rand = random.random()
         x = 0
         for i in range(len(probs)):
@@ -54,11 +59,5 @@ def generate_token(tokens):
                 return probs[i][0]
         return random.choice(candidates.keys)
     
-def encode():
-    pass
-
-def decode():
-    pass
-    
 starting_trigram = random.choice(ngrams)
-generate(list(starting_trigram), 200)
+generate(list(starting_trigram), 2048)
